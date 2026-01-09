@@ -1,0 +1,110 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+build/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Poetry / Pipenv
+.poetry/
+.pdm.toml
+Pipfile.lock
+poetry.lock
+ 
+# Jupyter / Vanna / Notebooks
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+# Vanna local vector stores
+vanna/
+.vanna/
+*.faiss
+*.index
+*.db
+ 
+# Dagster
+dagster_storage/
+dagster_home/
+.dagster/
+.history/
+
+# Dagster instance
+*.db-shm
+*.db-wal
+dagster.db
+ 
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+ 
+# Redis
+dump.rdb
+redis.conf
+*.rdb
+appendonly.aof
+ 
+# Logs
+*.log
+logs/
+log/
+
+ 
+# Environment / Secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+secrets/
+credentials.json
+ 
+# Docker
+.dockerignore
+docker-compose.override.yml
+ 
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+
+# Data / Artifacts
+data/
+datasets/
+artifacts/
+outputs/
+models/
+cache/
+
+# ML / Embeddings
+*.pt
+*.pth
+*.onnx
+*.npy
+*.npz
+*.pkl
+*.joblib
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
