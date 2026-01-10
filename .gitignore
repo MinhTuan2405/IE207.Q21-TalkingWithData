@@ -79,6 +79,7 @@ credentials.json
 # Docker
 .dockerignore
 docker-compose.override.yml
+volumes/
  
 # OS / Editor
 .DS_Store
