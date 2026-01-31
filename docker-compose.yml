@@ -1,0 +1,117 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: talkwdata_postgres
+    environment:
+      POSTGRES_USER: ${DAGSTER_PG_USERNAME}
+      POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      POSTGRES_DB: ${DAGSTER_PG_DB}
+    volumes:
+      - ./volumes/postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DAGSTER_PG_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - talkwdata_network
+
+  dagster_webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestration
+    image: dagster_orchestration:latest
+    container_name: talkwdata_dagster_webserver
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - /opt/dagster/dagster_home/workspace.yaml
+    environment:
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_HOSTNAME: postgres
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_OVERALL_CONCURRENCY_LIMIT: ${DAGSTER_OVERALL_CONCURRENCY_LIMIT}
+    volumes:
+      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ./volumes/dagster_home:/opt/dagster/dagster_home
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - talkwdata_network
+
+  dagster_daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestration
+    image: dagster_orchestration:latest
+    container_name: talkwdata_dagster_daemon
+    working_dir: /opt/dagster/dagster_home
+    entrypoint:
+      - dagster-daemon
+      - run
+    environment:
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_HOSTNAME: postgres
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_OVERALL_CONCURRENCY_LIMIT: ${DAGSTER_OVERALL_CONCURRENCY_LIMIT}
+    volumes:
+      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ./volumes/dagster_home:/opt/dagster/dagster_home
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - talkwdata_network
+
+  dagster_orchestration:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestration
+    image: dagster_orchestration:latest
+    container_name: talkwdata_dagster_orchestration
+    entrypoint:
+      - dagster
+      - api
+      - grpc
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "4000"
+      - -m
+      - orchestration.definitions
+    environment:
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_HOSTNAME: postgres
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+    volumes:
+      - ./volumes/dagster_home:/opt/dagster/dagster_home
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - talkwdata_network
+
+networks:
+  talkwdata_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  dagster_home:
+      
