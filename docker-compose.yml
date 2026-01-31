@@ -107,6 +107,16 @@ services:
     networks:
       - talkwdata_network
 
+  server:
+    build:
+      context: ./server
+      dockerfile: ../Dockerfile.server
+    container_name: talkwdata_server
+    ports:
+      - "8000:8000"
+    networks:
+      - talkwdata_network
+
 networks:
   talkwdata_network:
     driver: bridge
