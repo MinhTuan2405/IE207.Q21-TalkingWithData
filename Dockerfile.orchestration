@@ -17,7 +17,7 @@ COPY orchestration/ .
 RUN pip install --no-cache-dir uv
 
 # Install project dependencies (editable mode)
-RUN uv pip install --system --no-cache -e . dagster-webserver dagster-postgres
+RUN uv pip install --system --no-cache -e . 
 
 # Set environment variables
 ENV DAGSTER_HOME=/opt/dagster/dagster_home
