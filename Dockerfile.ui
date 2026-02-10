@@ -1,0 +1,65 @@
+# # Dockerfile for Custom Open WebUI
+# # Build from local source for full customization
+
+# FROM node:20-alpine AS frontend-builder
+
+# WORKDIR /app
+
+# # Copy source code (clone Open WebUI first to ui/open-webui/)
+# COPY ./ui/open-webui/package*.json ./
+# RUN npm ci
+
+# COPY ./ui/open-webui/ ./
+
+# # Customize environment variables for build
+# ENV PUBLIC_APP_NAME="Talking to Data"
+# ENV PUBLIC_VERSION="custom-1.0.0"
+
+# # Build frontend (SvelteKit)
+# RUN npm run build
+
+# # Backend stage
+# FROM python:3.11-slim
+
+# WORKDIR /app
+
+# # Install system dependencies
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#     curl \
+#     gcc \
+#     g++ \
+#     && rm -rf /var/lib/apt/lists/*
+
+# # Copy backend requirements
+# COPY ./ui/open-webui/backend/requirements.txt ./requirements.txt
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# # Copy built frontend from builder stage
+# COPY --from=frontend-builder /app/build ./frontend/build
+
+# # Copy backend source
+# COPY ./ui/open-webui/backend ./backend
+
+# # Set working directory to backend
+# WORKDIR /app/backend
+
+# # Environment variables
+# ENV PORT=8080
+# ENV WEBUI_NAME="Talking to Data"
+# ENV ENV=production
+# ENV DATA_DIR=/app/backend/data
+# ENV FRONTEND_BUILD_DIR=/app/frontend/build
+
+# # Create necessary directories
+# RUN mkdir -p /app/backend/data
+
+# # Expose port
+# EXPOSE 8080
+
+# # Health check
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+#     CMD curl -f http://localhost:8080/health || exit 1
+
+# # Run the application
+# CMD ["sh", "-c", "uvicorn open_webui.main:app --host 0.0.0.0 --port 8080 --forwarded-allow-ips '*'"]

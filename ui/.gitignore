@@ -1,0 +1,6 @@
+# Ignore Open WebUI source code (too large for git)
+open-webui/
+
+# But keep customization docs
+!README.md
+!*.md
