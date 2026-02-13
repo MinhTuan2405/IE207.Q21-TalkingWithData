@@ -41,8 +41,8 @@ services:
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
       DAGSTER_OVERALL_CONCURRENCY_LIMIT: ${DAGSTER_OVERALL_CONCURRENCY_LIMIT}
     volumes:
-      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
-      - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ./orchestration/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./orchestration/workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
       - ./volumes/dagster_home:/opt/dagster/dagster_home
     ports:
       - "3000:3000"
