@@ -68,6 +68,7 @@ log/
 
  
 # Environment / Secrets
+.server.env
 .env
 .env.*
 *.pem

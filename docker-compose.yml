@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:16
     container_name: talkwdata_postgres
+    env_file: ./orchestration/.env
     environment:
       POSTGRES_USER: ${DAGSTER_PG_USERNAME}
       POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
@@ -24,6 +25,7 @@ services:
       dockerfile: Dockerfile.orchestration
     image: dagster_orchestration:latest
     container_name: talkwdata_dagster_webserver
+    env_file: ./orchestration/.env
     entrypoint:
       - dagster-webserver
       - -h
@@ -56,6 +58,7 @@ services:
       dockerfile: Dockerfile.orchestration
     image: dagster_orchestration:latest
     container_name: talkwdata_dagster_daemon
+    env_file: ./orchestration/.env
     working_dir: /opt/dagster/dagster_home
     entrypoint:
       - dagster-daemon
@@ -82,6 +85,7 @@ services:
       dockerfile: Dockerfile.orchestration
     image: dagster_orchestration:latest
     container_name: talkwdata_dagster_orchestration
+    env_file: ./orchestration/.env
     entrypoint:
       - dagster
       - api
