@@ -1,5 +1,29 @@
+# FastAPI Framework
 fastapi==0.115.0
 uvicorn[standard]==0.32.0
 pydantic==2.10.3
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
+
+# Database
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.12
+
+# Ollama
+ollama==0.4.4
+
+# Vector Database
+qdrant-client==1.12.1
+
+# Embedding Models
+sentence-transformers==3.3.1
+
+# Additional utilities
+httpx==0.28.1
+numpy==2.2.1

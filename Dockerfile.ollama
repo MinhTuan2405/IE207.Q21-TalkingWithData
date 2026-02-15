@@ -1,0 +1,18 @@
+FROM ollama/ollama:latest
+
+# Set working directory
+WORKDIR /root
+
+# Expose Ollama port
+EXPOSE 11434
+
+# Set environment variables
+ENV OLLAMA_HOST=0.0.0.0
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD ollama list || exit 1
+
+# Default command
+ENTRYPOINT ["ollama"]
+CMD ["serve"]
