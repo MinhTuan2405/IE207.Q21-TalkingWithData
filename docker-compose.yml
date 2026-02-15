@@ -4,11 +4,17 @@ services:
     container_name: talkwdata_postgres
     env_file: ./orchestration/.env
     environment:
+      # Dagster Database (default database created by postgres image)
       POSTGRES_USER: ${DAGSTER_PG_USERNAME}
       POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
       POSTGRES_DB: ${DAGSTER_PG_DB}
+      # # FastAPI Server Database 
+      # TALKWDATA_DB: talkwdata_db
+      # TALKWDATA_USER: talkwdata_user
+      # TALKWDATA_PASSWORD: talkwdata_pass
     volumes:
       - ./volumes/postgres_data:/var/lib/postgresql/data
+      # - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -41,8 +47,8 @@ services:
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
       DAGSTER_OVERALL_CONCURRENCY_LIMIT: ${DAGSTER_OVERALL_CONCURRENCY_LIMIT}
     volumes:
-      - ./dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
-      - ./workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ./orchestration/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./orchestration/workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
       - ./volumes/dagster_home:/opt/dagster/dagster_home
     ports:
       - "3000:3000"
@@ -111,30 +117,78 @@ services:
     networks:
       - talkwdata_network
 
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    image: talkwdata_ollama:latest
+    container_name: talkwdata_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./volumes/ollama:/root/.ollama
+      - ./scripts/pull-ollama-models.sh:/root/pull-models.sh:ro
+    restart: unless-stopped
+    networks:
+      - talkwdata_network
+    # Uncomment the following lines if you have NVIDIA GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: talkwdata_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./volumes/qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+    networks:
+      - talkwdata_network
+
   server:
     build:
       context: ./server
       dockerfile: ../Dockerfile.server
     container_name: talkwdata_server
+    env_file: ./server/.server.env
     ports:
       - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    depends_on:
+      - ollama
+      - qdrant
+      - postgres
     networks:
       - talkwdata_network
 
   # open-webui:
   #   build:
   #     context: .
-  #     dockerfile: Dockerfile.UI
+  #     dockerfile: Dockerfile.ui
   #   container_name: talkwdata_open_webui
   #   ports:
   #     - "8080:8080"
   #   environment:
-  #     - WEBUI_NAME=Talking to Data
-  #     - OLLAMA_BASE_URL=http://host.docker.internal:11434
+  #     - WEBUI_NAME=Talking with Data
+  #     - OLLAMA_BASE_URL=http://ollama:11434
+  #     - OPENAI_API_BASE_URL=http://server:8000
   #   volumes:
   #     - ./volumes/open-webui:/app/backend/data
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
+  #   depends_on:
+  #     - ollama
+  #     - server
   #   restart: unless-stopped
   #   networks:
   #     - talkwdata_network
@@ -146,4 +200,7 @@ networks:
 volumes:
   postgres_data:
   dagster_home:
+  ollama:
+  qdrant_storage:
+  open-webui:
       
