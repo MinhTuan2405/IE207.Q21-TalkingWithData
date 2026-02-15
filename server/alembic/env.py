@@ -36,6 +36,7 @@ if config.config_file_name is not None:
 # Import Base from database module to get all models metadata
 try:
     from core.database import Base
+    from module.auth.model.user import User
     target_metadata = Base.metadata
 except ImportError:
     target_metadata = None
